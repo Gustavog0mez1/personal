@@ -5,11 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personal Trainer Pro - Recuperar Senha</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 </head>
 <body>
+    <!-- Cabeçalho -->
     <header>
         <div class="container header-content">
             <div class="logo">Personal Trainer Pro</div>
@@ -23,6 +21,7 @@
         </div>
     </header>
 
+    <!-- Conteúdo principal -->
     <div class="container">
         <div class="auth-container">
             <div class="auth-form">
@@ -42,39 +41,28 @@
         </div>
     </div>
 
+    <!-- Rodapé -->
     <footer>
         <div class="container">
             <p>&copy; 2023 Personal Trainer Pro - Todos os direitos reservados</p>
         </div>
     </footer>
 
-    <script src="firebase-config.js"></script>
+    <script src="script.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const forgotPasswordForm = document.getElementById('forgot-password-form');
             const forgotPasswordMessage = document.getElementById('forgot-password-message');
 
-            forgotPasswordForm.addEventListener('submit', async function(e) {
+            forgotPasswordForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 const email = document.getElementById('forgot-email').value;
                 
-                try {
-                    await firebase.auth().sendPasswordResetEmail(email);
-                    showMessage(forgotPasswordMessage, 'E-mail de recuperação enviado! Verifique sua caixa de entrada.', 'success');
-                } catch (error) {
-                    console.error('Erro ao recuperar senha:', error);
-                    let errorMessage = 'Erro ao enviar e-mail de recuperação!';
-                    
-                    switch (error.code) {
-                        case 'auth/user-not-found':
-                            errorMessage = 'E-mail não encontrado!';
-                            break;
-                        case 'auth/invalid-email':
-                            errorMessage = 'E-mail inválido!';
-                            break;
-                    }
-                    
-                    showMessage(forgotPasswordMessage, errorMessage, 'error');
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                if (users.find(u => u.email === email)) {
+                    showMessage(forgotPasswordMessage, 'Um e-mail de recuperação foi enviado!', 'success');
+                } else {
+                    showMessage(forgotPasswordMessage, 'E-mail não encontrado!', 'error');
                 }
             });
 
