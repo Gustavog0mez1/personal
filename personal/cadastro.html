@@ -5,12 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Personal Trainer Pro - Cadastro</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
+    <!-- Cabeçalho -->
     <header>
         <div class="container header-content">
             <div class="logo">Personal Trainer Pro</div>
@@ -23,6 +20,7 @@
         </div>
     </header>
 
+    <!-- Conteúdo principal -->
     <div class="container">
         <div class="auth-container">
             <div class="auth-form">
@@ -39,7 +37,7 @@
                     </div>
                     <div class="form-group">
                         <label for="register-password">Senha</label>
-                        <input type="password" id="register-password" minlength="6" required>
+                        <input type="password" id="register-password" required>
                     </div>
                     <div class="form-group">
                         <label for="register-confirm-password">Confirmar Senha</label>
@@ -54,19 +52,20 @@
         </div>
     </div>
 
+    <!-- Rodapé -->
     <footer>
         <div class="container">
             <p>&copy; 2023 Personal Trainer Pro - Todos os direitos reservados</p>
         </div>
     </footer>
 
-    <script src="firebase-config.js"></script>
+    <script src="script.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const registerForm = document.getElementById('register-form');
             const registerMessage = document.getElementById('register-message');
 
-            registerForm.addEventListener('submit', async function(e) {
+            registerForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 const name = document.getElementById('register-name').value;
                 const email = document.getElementById('register-email').value;
@@ -78,48 +77,26 @@
                     return;
                 }
                 
-                if (password.length < 6) {
-                    showMessage(registerMessage, 'A senha deve ter pelo menos 6 caracteres!', 'error');
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                if (users.find(u => u.email === email)) {
+                    showMessage(registerMessage, 'Este e-mail já está cadastrado!', 'error');
                     return;
                 }
                 
-                try {
-                    // Criar usuário no Firebase Auth
-                    const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
-                    const user = userCredential.user;
-                    
-                    // Salvar informações adicionais no Firestore
-                    await firebase.firestore().collection('users').doc(user.uid).set({
-                        name: name,
-                        email: email,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    
-                    showMessage(registerMessage, 'Cadastro realizado com sucesso!', 'success');
-                    
-                    // Redirecionar após cadastro bem-sucedido
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1500);
-                    
-                } catch (error) {
-                    console.error('Erro no cadastro:', error);
-                    let errorMessage = 'Erro ao criar conta!';
-                    
-                    switch (error.code) {
-                        case 'auth/email-already-in-use':
-                            errorMessage = 'Este e-mail já está em uso!';
-                            break;
-                        case 'auth/invalid-email':
-                            errorMessage = 'E-mail inválido!';
-                            break;
-                        case 'auth/weak-password':
-                            errorMessage = 'Senha muito fraca!';
-                            break;
-                    }
-                    
-                    showMessage(registerMessage, errorMessage, 'error');
-                }
+                const newUser = {
+                    id: Date.now().toString(),
+                    name,
+                    email,
+                    password
+                };
+                
+                users.push(newUser);
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                showMessage(registerMessage, 'Cadastro realizado com sucesso!', 'success');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500);
             });
 
             function showMessage(element, message, type) {
