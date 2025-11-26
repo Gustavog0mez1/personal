@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Trainer Pro - Dashboard</title>
+    <title>Login - Personal Trainer Pro</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
     <header>
@@ -12,91 +15,87 @@
             <div class="logo">Personal Trainer Pro</div>
             <nav>
                 <ul>
-                    <li><a href="index.html">Início</a></li>
-                    <li><a href="#" id="logout-btn">Sair</a></li>
+                    <li><a href="index.html" style="background-color: #3498db;">Login</a></li>
+                    <li><a href="cadastro.html">Cadastro</a></li>
                 </ul>
             </nav>
         </div>
     </header>
+
     <div class="container">
-        <div class="dashboard">
-            <h1>Agenda de Treinos</h1>
-            <div class="appointment-form">
-                <h3>Agendar Novo Treino</h3>
-                <form id="appointment-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="appointment-date">Data</label>
-                            <input type="date" id="appointment-date" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="appointment-time">Horário</label>
-                            <input type="time" id="appointment-time" required>
-                        </div>
+        <div class="auth-container">
+            <div class="auth-form">
+                <h2>Login</h2>
+                <div id="login-message" class="message" style="display: none;"></div>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">E-mail</label>
+                        <input type="email" id="login-email" placeholder="seu@email.com" required>
                     </div>
                     <div class="form-group">
-                        <label for="appointment-location">Local</label>
-                        <input type="text" id="appointment-location" placeholder="Ex: Academia Central" required>
+                        <label for="login-password">Senha</label>
+                        <input type="password" id="login-password" placeholder="Sua senha" required>
                     </div>
-                    <button type="submit" class="btn">Agendar Treino</button>
+                    <button type="submit" class="btn">Entrar</button>
                 </form>
-            </div>
-            <div class="calendar-container">
-                <div class="calendar-header">
-                    <h2 id="current-month">Junho 2023</h2>
-                    <div class="calendar-nav">
-                        <button id="prev-month">&lt; Mês Anterior</button>
-                        <button id="next-month">Próximo Mês &gt;</button>
-                    </div>
+                <div class="auth-links">
+                    <a href="recuperar-senha.html">Esqueci minha senha</a>
+                    <p>Não tem uma conta? <a href="cadastro.html">Cadastre-se aqui</a></p>
                 </div>
-                <table class="calendar">
-                    <thead>
-                        <tr>
-                            <th>Dom</th>
-                            <th>Seg</th>
-                            <th>Ter</th>
-                            <th>Qua</th>
-                            <th>Qui</th>
-                            <th>Sex</th>
-                            <th>Sáb</th>
-                        </tr>
-                    </thead>
-                    <tbody id="calendar-body">
-                    </tbody>
-                </table>
             </div>
-            <button id="view-appointments-btn" class="btn" style="margin-top: 20px;">Ver Meus Agendamentos</button>
         </div>
     </div>
-    <div id="appointments-modal" class="appointments-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Meus Agendamentos</h3>
-                <button class="close-modal">&times;</button>
-            </div>
-            <ul id="appointments-list" class="appointments-list">
-            </ul>
-        </div>
-    </div>
-  
+
     <footer>
         <div class="container">
             <p>&copy; 2023 Personal Trainer Pro - Todos os direitos reservados</p>
         </div>
     </footer>
 
-    <script src="script.js"></script>
     <script>
-  
         document.addEventListener('DOMContentLoaded', function() {
-         
-            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-            if (!currentUser) {
-                window.location.href = 'login.html';
+            // Verificar se já está logado
+            const usuarioLogado = localStorage.getItem('usuarioLogado');
+            if (usuarioLogado) {
+                window.location.href = 'inicio.html';
                 return;
             }
 
-            initDashboard();
+            const loginForm = document.getElementById('login-form');
+            const loginMessage = document.getElementById('login-message');
+
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+
+                if (!email || !password) {
+                    showMessage(loginMessage, 'Preencha todos os campos!', 'error');
+                    return;
+                }
+
+                // Buscar usuário no localStorage
+                const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+                const usuario = usuarios.find(user => user.email === email && user.password === password);
+
+                if (usuario) {
+                    // Salvar usuário logado
+                    localStorage.setItem('usuarioLogado', JSON.stringify(usuario));
+                    showMessage(loginMessage, 'Login realizado! Redirecionando...', 'success');
+                    setTimeout(function() {
+                        window.location.href = 'inicio.html';
+                    }, 1000);
+                } else {
+                    showMessage(loginMessage, 'E-mail ou senha incorretos!', 'error');
+                }
+            });
+
+            function showMessage(element, message, type) {
+                element.textContent = message;
+                element.className = `message ${type}`;
+                element.style.display = 'block';
+            }
         });
     </script>
 </body>
