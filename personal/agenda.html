@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Agenda - Personal Trainer Pro</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <div class="logo">Personal Trainer Pro</div>
+            <nav>
+                <ul>
+                    <li><a href="inicio.html">Início</a></li>
+                    <li><a href="perfil.html">Meu Perfil</a></li>
+                    <li><a href="agenda.html" style="background-color: #3498db;">Minha Agenda</a></li>
+                    <li><a href="#" id="logout-btn">Sair</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="dashboard">
+            <h1>Minha Agenda</h1>
+            
+            <div class="profile-card">
+                <div class="profile-header">
+                    <h2 id="agenda-title">Carregando...</h2>
+                    <p id="agenda-subtitle">Seus agendamentos de treino</p>
+                </div>
+            </div>
+
+            <div id="agenda-list" class="schedule-list">
+                <!-- Os agendamentos serão carregados aqui -->
+            </div>
+
+            <div id="no-appointments" class="profile-card" style="display: none; text-align: center;">
+                <div class="profile-header">
+                    <h3>Nenhum treino agendado</h3>
+                    <p>Você ainda não possui treinos agendados.</p>
+                    <a href="inicio.html" class="btn" style="display: inline-block; width: auto; padding: 10px 20px; margin-top: 15px;">
+                        Agendar Primeiro Treino
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Personal Trainer Pro - Todos os direitos reservados</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
+            
+            if (!usuarioLogado) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Configurar título da agenda
+            const isPersonal = usuarioLogado.tipo === 'personal';
+            document.getElementById('agenda-title').textContent = 
+                isPersonal ? `Agenda - ${usuarioLogado.name}` : 'Meus Treinos Agendados';
+            document.getElementById('agenda-subtitle').textContent = 
+                isPersonal ? 'Seus clientes e horários' : 'Seus treinos com personal trainers';
+
+            // Carregar agendamentos
+            carregarAgenda(usuarioLogado);
+
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', function() {
+                localStorage.removeItem('usuarioLogado');
+                window.location.href = 'index.html';
+            });
+
+            function carregarAgenda(usuario) {
+                const agendamentos = JSON.parse(localStorage.getItem('agendamentos')) || [];
+                const agendaList = document.getElementById('agenda-list');
+                const noAppointments = document.getElementById('no-appointments');
+
+                let meusAgendamentos = [];
+
+                if (usuario.tipo === 'personal') {
+                    // Personal vê todos os agendamentos com ele
+                    meusAgendamentos = agendamentos.filter(ag => ag.trainer === usuario.name);
+                } else {
+                    // Cliente vê apenas seus agendamentos
+                    meusAgendamentos = agendamentos.filter(ag => ag.client === usuario.name);
+                }
+
+                // Ordenar por data e hora
+                meusAgendamentos.sort((a, b) => {
+                    const dateA = new Date(a.date + 'T' + a.time);
+                    const dateB = new Date(b.date + 'T' + b.time);
+                    return dateA - dateB;
+                });
+
+                if (meusAgendamentos.length === 0) {
+                    agendaList.style.display = 'none';
+                    noAppointments.style.display = 'block';
+                } else {
+                    agendaList.innerHTML = '';
+                    noAppointments.style.display = 'none';
+                    
+                    meusAgendamentos.forEach(agendamento => {
+                        const data = new Date(agendamento.date + 'T' + agendamento.time);
+                        const scheduleItem = document.createElement('div');
+                        scheduleItem.className = 'schedule-item';
+                        
+                        if (usuario.tipo === 'personal') {
+                            scheduleItem.innerHTML = `
+                                <div class="schedule-time">
+                                    ${data.toLocaleDateString('pt-BR')} - ${agendamento.time}
+                                </div>
+                                <div class="schedule-details">
+                                    <strong>Cliente:</strong> ${agendamento.client}<br>
+                                    <strong>Local:</strong> ${agendamento.location}<br>
+                                    <strong>Contato:</strong> ${agendamento.clientEmail}<br>
+                                    <strong>Duração:</strong> 1 hora
+                                </div>
+                            `;
+                        } else {
+                            scheduleItem.innerHTML = `
+                                <div class="schedule-time">
+                                    ${data.toLocaleDateString('pt-BR')} - ${agendamento.time}
+                                </div>
+                                <div class="schedule-details">
+                                    <strong>Personal Trainer:</strong> ${agendamento.trainer}<br>
+                                    <strong>Local:</strong> ${agendamento.location}<br>
+                                    <strong>Duração:</strong> 1 hora
+                                </div>
+                            `;
+                        }
+                        
+                        agendaList.appendChild(scheduleItem);
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
