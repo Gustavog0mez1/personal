@@ -3,100 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Trainer Pro - Cadastro</title>
+    <title>Cadastro - Personal Trainer Pro</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 </head>
 <body>
-    <!-- Cabeçalho -->
     <header>
         <div class="container header-content">
             <div class="logo">Personal Trainer Pro</div>
             <nav>
                 <ul>
-                    <li><a href="index.html">Início</a></li>
-                    <li><a href="login.html">Login</a></li>
+                    <li><a href="index.html">Login</a></li>
+                    <li><a href="cadastro.html" style="background-color: #3498db;">Cadastro</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
-    <!-- Conteúdo principal -->
     <div class="container">
         <div class="auth-container">
             <div class="auth-form">
-                <h2>Cadastro</h2>
+                <h2>Criar Conta</h2>
                 <div id="register-message" class="message" style="display: none;"></div>
                 <form id="register-form">
                     <div class="form-group">
                         <label for="register-name">Nome Completo</label>
-                        <input type="text" id="register-name" required>
+                        <input type="text" id="register-name" placeholder="Apenas letras e espaços" 
+                               pattern="[A-Za-zÀ-ÿ\s]+" title="Apenas letras são permitidas" required>
                     </div>
                     <div class="form-group">
                         <label for="register-email">E-mail</label>
-                        <input type="email" id="register-email" required>
+                        <input type="email" id="register-email" placeholder="seu@email.com" required>
                     </div>
                     <div class="form-group">
                         <label for="register-password">Senha</label>
-                        <input type="password" id="register-password" required>
+                        <input type="password" id="register-password" placeholder="Mínimo 6 caracteres" minlength="6" required>
                     </div>
                     <div class="form-group">
                         <label for="register-confirm-password">Confirmar Senha</label>
-                        <input type="password" id="register-confirm-password" required>
+                        <input type="password" id="register-confirm-password" placeholder="Digite a senha novamente" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-type">Tipo de Usuário</label>
+                        <select id="register-type" required>
+                            <option value="">Selecione...</option>
+                            <option value="cliente">Cliente</option>
+                            <option value="personal">Personal Trainer</option>
+                        </select>
                     </div>
                     <button type="submit" class="btn">Cadastrar</button>
                 </form>
                 <div class="auth-links">
-                    <p>Já tem uma conta? <a href="login.html">Faça login</a></p>
+                    <p>Já tem uma conta? <a href="index.html">Faça login aqui</a></p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Rodapé -->
     <footer>
         <div class="container">
             <p>&copy; 2023 Personal Trainer Pro - Todos os direitos reservados</p>
         </div>
     </footer>
 
-    <script src="script.js"></script>
+    <script src="firebase-config.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const registerForm = document.getElementById('register-form');
             const registerMessage = document.getElementById('register-message');
 
+            // Validar nome em tempo real
+            document.getElementById('register-name').addEventListener('input', function(e) {
+                this.value = this.value.replace(/[^A-Za-zÀ-ÿ\s]/g, '');
+            });
+
             registerForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                const name = document.getElementById('register-name').value;
-                const email = document.getElementById('register-email').value;
+                
+                const name = document.getElementById('register-name').value.trim();
+                const email = document.getElementById('register-email').value.trim();
                 const password = document.getElementById('register-password').value;
                 const confirmPassword = document.getElementById('register-confirm-password').value;
-                
+                const userType = document.getElementById('register-type').value;
+
+                // Validações
+                if (!name || !email || !password || !confirmPassword || !userType) {
+                    showMessage(registerMessage, 'Preencha todos os campos!', 'error');
+                    return;
+                }
+
+                if (name.length < 2) {
+                    showMessage(registerMessage, 'Nome deve ter pelo menos 2 caracteres!', 'error');
+                    return;
+                }
+
+                if (!/^[A-Za-zÀ-ÿ\s]+$/.test(name)) {
+                    showMessage(registerMessage, 'Nome deve conter apenas letras!', 'error');
+                    return;
+                }
+
                 if (password !== confirmPassword) {
                     showMessage(registerMessage, 'As senhas não coincidem!', 'error');
                     return;
                 }
+
+                if (password.length < 6) {
+                    showMessage(registerMessage, 'A senha deve ter pelo menos 6 caracteres!', 'error');
+                    return;
+                }
+
+                // Verificar se email já existe
+                const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
+                const emailExistente = usuarios.find(user => user.email === email);
                 
-                const users = JSON.parse(localStorage.getItem('users')) || [];
-                if (users.find(u => u.email === email)) {
+                if (emailExistente) {
                     showMessage(registerMessage, 'Este e-mail já está cadastrado!', 'error');
                     return;
                 }
-                
-                const newUser = {
-                    id: Date.now().toString(),
-                    name,
-                    email,
-                    password
+
+                // Criar usuário
+                const novoUsuario = {
+                    id: Date.now(),
+                    name: name,
+                    email: email,
+                    password: password,
+                    tipo: userType,
+                    createdAt: new Date().toISOString()
                 };
-                
-                users.push(newUser);
-                localStorage.setItem('users', JSON.stringify(users));
-                
+
+                usuarios.push(novoUsuario);
+                localStorage.setItem('usuarios', JSON.stringify(usuarios));
+
                 showMessage(registerMessage, 'Cadastro realizado com sucesso!', 'success');
-                setTimeout(() => {
-                    window.location.href = 'login.html';
-                }, 1500);
+                
+                setTimeout(function() {
+                    window.location.href = 'index.html';
+                }, 2000);
             });
 
             function showMessage(element, message, type) {
