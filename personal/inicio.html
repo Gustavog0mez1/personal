@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Trainer Pro - Início</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container header-content">
+            <div class="logo">Personal Trainer Pro</div>
+            <nav>
+                <ul>
+                    <li><a href="inicio.html" style="background-color: #3498db;">Início</a></li>
+                    <li><a href="perfil.html">Meu Perfil</a></li>
+                    <li><a href="agenda.html">Minha Agenda</a></li>
+                    <li><a href="#" id="logout-btn">Sair</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="dashboard">
+            <h1 id="welcome-title">Bem-vindo ao Personal Trainer Pro</h1>
+            
+            <div class="profile-card">
+                <div class="profile-header">
+                    <h2 id="welcome-user">Olá, Usuário!</h2>
+                    <p id="user-type">Sistema de Agendamentos</p>
+                </div>
+                
+                <div class="profile-info">
+                    <h3>Funcionalidades:</h3>
+                    <div class="info-item">
+                        <span class="info-label">Agendar Treinos</span>
+                        <span class="info-value">✅ Disponível</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Ver Perfil</span>
+                        <span class="info-value">✅ Disponível</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Consultar Agenda</span>
+                        <span class="info-value">✅ Disponível</span>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <a href="perfil.html" class="btn" style="display: inline-block; width: auto; padding: 12px 30px; margin-right: 15px;">Meu Perfil</a>
+                    <a href="agenda.html" class="btn" style="display: inline-block; width: auto; padding: 12px 30px; background-color: #2c3e50;">Minha Agenda</a>
+                </div>
+            </div>
+
+            <!-- Formulário de Agendamento -->
+            <div class="appointment-form">
+                <h3>Agendar Novo Treino</h3>
+                <form id="appointment-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="appointment-date">Data</label>
+                            <input type="date" id="appointment-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="appointment-time">Horário</label>
+                            <input type="time" id="appointment-time" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointment-location">Local</label>
+                        <input type="text" id="appointment-location" placeholder="Academia Central" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="appointment-trainer">Personal Trainer</label>
+                        <select id="appointment-trainer" required>
+                            <option value="">Selecione o personal</option>
+                            <option value="João Silva">João Silva</option>
+                            <option value="Maria Santos">Maria Santos</option>
+                            <option value="Pedro Costa">Pedro Costa</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn">Agendar Treino</button>
+                </form>
+            </div>
+
+            <!-- Treinos Recentes -->
+            <div class="profile-card">
+                <h3>Meus Últimos Treinos</h3>
+                <div id="recent-trainings">
+                    <p>Carregando treinos...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Personal Trainer Pro - Todos os direitos reservados</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar se usuário está logado
+            const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
+            if (!usuarioLogado) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Mostrar dados do usuário
+            document.getElementById('welcome-title').textContent = `Bem-vindo, ${usuarioLogado.name}!`;
+            document.getElementById('welcome-user').textContent = `Olá, ${usuarioLogado.name}!`;
+            document.getElementById('user-type').textContent = `Tipo: ${usuarioLogado.tipo === 'personal' ? 'Personal Trainer' : 'Cliente'}`;
+
+            // Carregar treinos recentes
+            carregarTreinosRecentes(usuarioLogado);
+
+            // Formulário de agendamento
+            const appointmentForm = document.getElementById('appointment-form');
+            if (appointmentForm) {
+                appointmentForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const date = document.getElementById('appointment-date').value;
+                    const time = document.getElementById('appointment-time').value;
+                    const location = document.getElementById('appointment-location').value;
+                    const trainer = document.getElementById('appointment-trainer').value;
+
+                    if (!date || !time || !location || !trainer) {
+                        alert('Preencha todos os campos!');
+                        return;
+                    }
+
+                    // Salvar agendamento
+                    const agendamentos = JSON.parse(localStorage.getItem('agendamentos')) || [];
+                    const novoAgendamento = {
+                        id: Date.now(),
+                        date: date,
+                        time: time,
+                        location: location,
+                        trainer: trainer,
+                        client: usuarioLogado.name,
+                        clientEmail: usuarioLogado.email,
+                        createdAt: new Date().toISOString()
+                    };
+                    
+                    agendamentos.push(novoAgendamento);
+                    localStorage.setItem('agendamentos', JSON.stringify(agendamentos));
+                    
+                    alert('Treino agendado com sucesso!');
+                    appointmentForm.reset();
+                    carregarTreinosRecentes(usuarioLogado);
+                });
+            }
+
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', function() {
+                localStorage.removeItem('usuarioLogado');
+                window.location.href = 'index.html';
+            });
+
+            function carregarTreinosRecentes(usuario) {
+                const agendamentos = JSON.parse(localStorage.getItem('agendamentos')) || [];
+                const recentTrainings = document.getElementById('recent-trainings');
+                
+                let meusAgendamentos = [];
+
+                if (usuario.tipo === 'personal') {
+                    meusAgendamentos = agendamentos.filter(ag => ag.trainer === usuario.name);
+                } else {
+                    meusAgendamentos = agendamentos.filter(ag => ag.client === usuario.name);
+                }
+
+                // Ordenar por data mais recente
+                meusAgendamentos.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                
+                // Pegar últimos 3 agendamentos
+                const ultimosTreinos = meusAgendamentos.slice(0, 3);
+
+                if (ultimosTreinos.length === 0) {
+                    recentTrainings.innerHTML = '<p>Nenhum treino agendado ainda.</p>';
+                    return;
+                }
+
+                recentTrainings.innerHTML = '';
+                ultimosTreinos.forEach(treino => {
+                    const data = new Date(treino.date + 'T' + treino.time);
+                    const treinoElement = document.createElement('div');
+                    treinoElement.className = 'schedule-item';
+                    treinoElement.style.marginBottom = '10px';
+                    
+                    if (usuario.tipo === 'personal') {
+                        treinoElement.innerHTML = `
+                            <div class="schedule-time">
+                                ${data.toLocaleDateString('pt-BR')} - ${treino.time}
+                            </div>
+                            <div class="schedule-details">
+                                <strong>Cliente:</strong> ${treino.client}<br>
+                                <strong>Local:</strong> ${treino.location}
+                            </div>
+                        `;
+                    } else {
+                        treinoElement.innerHTML = `
+                            <div class="schedule-time">
+                                ${data.toLocaleDateString('pt-BR')} - ${treino.time}
+                            </div>
+                            <div class="schedule-details">
+                                <strong>Personal:</strong> ${treino.trainer}<br>
+                                <strong>Local:</strong> ${treino.location}
+                            </div>
+                        `;
+                    }
+                    
+                    recentTrainings.appendChild(treinoElement);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
