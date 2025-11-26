@@ -3,85 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Trainer Pro - Login</title>
+    <title>Meu Perfil - Personal Trainer Pro</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Cabeçalho -->
     <header>
         <div class="container header-content">
             <div class="logo">Personal Trainer Pro</div>
             <nav>
                 <ul>
-                    <li><a href="index.html">Início</a></li>
-                    <li><a href="cadastro.html">Cadastro</a></li>
+                    <li><a href="inicio.html">Início</a></li>
+                    <li><a href="perfil.html" style="background-color: #3498db;">Meu Perfil</a></li>
+                    <li><a href="agenda.html">Minha Agenda</a></li>
+                    <li><a href="#" id="logout-btn">Sair</a></li>
                 </ul>
             </nav>
         </div>
     </header>
 
-    <!-- Conteúdo principal -->
     <div class="container">
-        <div class="auth-container">
-            <div class="auth-form">
-                <h2>Login</h2>
-                <div id="login-message" class="message" style="display: none;"></div>
-                <form id="login-form">
-                    <div class="form-group">
-                        <label for="login-email">E-mail</label>
-                        <input type="email" id="login-email" required>
+        <div class="dashboard">
+            <h1>Meu Perfil</h1>
+            
+            <div class="profile-card">
+                <div class="profile-header">
+                    <img src="https://via.placeholder.com/150/3498db/ffffff?text=USER" alt="Foto do Perfil" class="profile-pic">
+                    <h2 id="profile-name">Carregando...</h2>
+                    <p id="profile-type" class="user-type"></p>
+                </div>
+                
+                <div class="profile-info">
+                    <h3>Informações Pessoais</h3>
+                    <div class="info-item">
+                        <span class="info-label">Nome Completo:</span>
+                        <span class="info-value" id="info-name">-</span>
                     </div>
-                    <div class="form-group">
-                        <label for="login-password">Senha</label>
-                        <input type="password" id="login-password" required>
+                    <div class="info-item">
+                        <span class="info-label">E-mail:</span>
+                        <span class="info-value" id="info-email">-</span>
                     </div>
-                    <button type="submit" class="btn">Entrar</button>
-                </form>
-                <div class="auth-links">
-                    <a href="recuperar-senha.html">Esqueci minha senha</a>
-                    <p>Não tem uma conta? <a href="cadastro.html">Cadastre-se</a></p>
+                    <div class="info-item">
+                        <span class="info-label">Tipo de Usuário:</span>
+                        <span class="info-value" id="info-tipo">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Data de Cadastro:</span>
+                        <span class="info-value" id="info-data">-</span>
+                    </div>
+                </div>
+
+                <div class="profile-info">
+                    <h3>Estatísticas</h3>
+                    <div class="info-item">
+                        <span class="info-label">Total de Treinos:</span>
+                        <span class="info-value" id="stats-treinos">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Próximo Treino:</span>
+                        <span class="info-value" id="stats-proximo">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Status:</span>
+                        <span class="info-value" id="stats-status">Ativo</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Rodapé -->
     <footer>
         <div class="container">
             <p>&copy; 2023 Personal Trainer Pro - Todos os direitos reservados</p>
         </div>
     </footer>
 
-    <script src="script.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const loginForm = document.getElementById('login-form');
-            const loginMessage = document.getElementById('login-message');
+            // Carregar dados do usuário logado
+            const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
+            
+            if (!usuarioLogado) {
+                window.location.href = 'index.html';
+                return;
+            }
 
-            loginForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const email = document.getElementById('login-email').value;
-                const password = document.getElementById('login-password').value;
-                
-                const users = JSON.parse(localStorage.getItem('users')) || [];
-                const user = users.find(u => u.email === email && u.password === password);
-                
-                if (user) {
-                    localStorage.setItem('currentUser', JSON.stringify(user));
-                    showMessage(loginMessage, 'Login realizado com sucesso!', 'success');
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1000);
-                } else {
-                    showMessage(loginMessage, 'E-mail ou senha incorretos!', 'error');
-                }
+            // Preencher dados do perfil
+            document.getElementById('profile-name').textContent = usuarioLogado.name;
+            document.getElementById('profile-type').textContent = usuarioLogado.tipo === 'personal' ? 'Personal Trainer' : 'Cliente';
+            document.getElementById('info-name').textContent = usuarioLogado.name;
+            document.getElementById('info-email').textContent = usuarioLogado.email;
+            document.getElementById('info-tipo').textContent = usuarioLogado.tipo === 'personal' ? 'Personal Trainer' : 'Cliente';
+            
+            if (usuarioLogado.createdAt) {
+                const data = new Date(usuarioLogado.createdAt);
+                document.getElementById('info-data').textContent = data.toLocaleDateString('pt-BR');
+            }
+
+            // Calcular estatísticas
+            const agendamentos = JSON.parse(localStorage.getItem('agendamentos')) || [];
+            let meusTreinos = [];
+            let proximoTreino = null;
+
+            if (usuarioLogado.tipo === 'personal') {
+                meusTreinos = agendamentos.filter(ag => ag.trainer === usuarioLogado.name);
+            } else {
+                meusTreinos = agendamentos.filter(ag => ag.client === usuarioLogado.name);
+            }
+
+            // Encontrar próximo treino
+            const agora = new Date();
+            const treinosFuturos = meusTreinos.filter(ag => {
+                const dataTreino = new Date(ag.date + 'T' + ag.time);
+                return dataTreino > agora;
             });
 
-            function showMessage(element, message, type) {
-                element.textContent = message;
-                element.className = `message ${type}`;
-                element.style.display = 'block';
+            if (treinosFuturos.length > 0) {
+                treinosFuturos.sort((a, b) => new Date(a.date + 'T' + a.time) - new Date(b.date + 'T' + b.time));
+                proximoTreino = treinosFuturos[0];
             }
+
+            document.getElementById('stats-treinos').textContent = meusTreinos.length;
+
+            if (proximoTreino) {
+                const dataProximo = new Date(proximoTreino.date + 'T' + proximoTreino.time);
+                document.getElementById('stats-proximo').textContent = 
+                    `${dataProximo.toLocaleDateString('pt-BR')} - ${proximoTreino.time}`;
+            } else {
+                document.getElementById('stats-proximo').textContent = 'Nenhum agendado';
+            }
+
+            // Estilizar tipo de usuário
+            const profileType = document.getElementById('profile-type');
+            if (usuarioLogado.tipo === 'personal') {
+                profileType.style.color = '#e74c3c';
+                profileType.style.fontWeight = 'bold';
+            } else {
+                profileType.style.color = '#3498db';
+                profileType.style.fontWeight = 'bold';
+            }
+
+            // Logout
+            document.getElementById('logout-btn').addEventListener('click', function() {
+                localStorage.removeItem('usuarioLogado');
+                window.location.href = 'index.html';
+            });
         });
     </script>
 </body>
