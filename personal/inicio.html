@@ -51,9 +51,7 @@
                     <a href="perfil.html" class="btn" style="display: inline-block; width: auto; padding: 12px 30px; margin-right: 15px;">Meu Perfil</a>
                     <a href="agenda.html" class="btn" style="display: inline-block; width: auto; padding: 12px 30px; background-color: #2c3e50;">Minha Agenda</a>
                 </div>
-            </div>
-
-            <!-- Formulário de Agendamento -->
+                
             <div class="appointment-form">
                 <h3>Agendar Novo Treino</h3>
                 <form id="appointment-form">
@@ -84,7 +82,6 @@
                 </form>
             </div>
 
-            <!-- Treinos Recentes -->
             <div class="profile-card">
                 <h3>Meus Últimos Treinos</h3>
                 <div id="recent-trainings">
@@ -102,22 +99,18 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Verificar se usuário está logado
+            
             const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
             if (!usuarioLogado) {
                 window.location.href = 'index.html';
                 return;
             }
-
-            // Mostrar dados do usuário
+            
             document.getElementById('welcome-title').textContent = `Bem-vindo, ${usuarioLogado.name}!`;
             document.getElementById('welcome-user').textContent = `Olá, ${usuarioLogado.name}!`;
             document.getElementById('user-type').textContent = `Tipo: ${usuarioLogado.tipo === 'personal' ? 'Personal Trainer' : 'Cliente'}`;
-
-            // Carregar treinos recentes
+            
             carregarTreinosRecentes(usuarioLogado);
-
-            // Formulário de agendamento
             const appointmentForm = document.getElementById('appointment-form');
             if (appointmentForm) {
                 appointmentForm.addEventListener('submit', function(e) {
@@ -133,7 +126,6 @@
                         return;
                     }
 
-                    // Salvar agendamento
                     const agendamentos = JSON.parse(localStorage.getItem('agendamentos')) || [];
                     const novoAgendamento = {
                         id: Date.now(),
@@ -154,8 +146,7 @@
                     carregarTreinosRecentes(usuarioLogado);
                 });
             }
-
-            // Logout
+            
             document.getElementById('logout-btn').addEventListener('click', function() {
                 localStorage.removeItem('usuarioLogado');
                 window.location.href = 'index.html';
@@ -173,10 +164,8 @@
                     meusAgendamentos = agendamentos.filter(ag => ag.client === usuario.name);
                 }
 
-                // Ordenar por data mais recente
                 meusAgendamentos.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                 
-                // Pegar últimos 3 agendamentos
                 const ultimosTreinos = meusAgendamentos.slice(0, 3);
 
                 if (ultimosTreinos.length === 0) {
