@@ -1,0 +1,4 @@
+A tela de login onde vc consegue ir para a tela inicial,mais antes de vc logar vc tem que ter um cadastro onde tem a tela de cadastro,logo apos entrar tem uma imagem do usuario com o nome dele embaixo, embaixo da imagem coloquei um calendário para o cliente ver os dias  e em baixo do calendario uma linha de data para que ele possa marcar o treino dele,onde mostramos os profissionais que temos e a academia é a academia que o cliente frequenta, logo apos ele marcar o treino aparece no calendario uma bolinha no dia marcado por ele.
+Na mesma tela no canto superior temos a parte do perfil,obde clicando vai para uma tela com as informações do cliente e quantos treinos marcados ele tem.
+ Temos a pagina de recuperação de senha,quando o cliente coloca seu email e nao lembra sua senha,onde k cliente colocando o email dele enviamos um codigo para ele recuperar seu login. Deixe isso em forma de descrição do meu site bem formal e escreva oq
+falta
