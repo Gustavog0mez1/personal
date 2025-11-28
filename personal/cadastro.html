@@ -73,8 +73,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const registerForm = document.getElementById('register-form');
             const registerMessage = document.getElementById('register-message');
-
-            // Validar nome em tempo real
+            
             document.getElementById('register-name').addEventListener('input', function(e) {
                 this.value = this.value.replace(/[^A-Za-zÀ-ÿ\s]/g, '');
             });
@@ -88,7 +87,6 @@
                 const confirmPassword = document.getElementById('register-confirm-password').value;
                 const userType = document.getElementById('register-type').value;
 
-                // Validações
                 if (!name || !email || !password || !confirmPassword || !userType) {
                     showMessage(registerMessage, 'Preencha todos os campos!', 'error');
                     return;
@@ -114,7 +112,6 @@
                     return;
                 }
 
-                // Verificar se email já existe
                 const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
                 const emailExistente = usuarios.find(user => user.email === email);
                 
@@ -122,8 +119,7 @@
                     showMessage(registerMessage, 'Este e-mail já está cadastrado!', 'error');
                     return;
                 }
-
-                // Criar usuário
+                
                 const novoUsuario = {
                     id: Date.now(),
                     name: name,
