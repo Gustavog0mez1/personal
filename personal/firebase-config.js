@@ -1,5 +1,3 @@
-// firebase-config.js
-// Configuração simplificada para teste
 const firebaseConfig = {
     apiKey: "AIzaSyBpk1IgyayDkDQRiPIocfCQKqOzSzUOJis",
     authDomain: "personal-6de12.firebaseapp.com",
