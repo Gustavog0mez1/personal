@@ -79,15 +79,13 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Carregar dados do usuário logado
+        
             const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
             
             if (!usuarioLogado) {
                 window.location.href = 'index.html';
                 return;
             }
-
-            // Preencher dados do perfil
             document.getElementById('profile-name').textContent = usuarioLogado.name;
             document.getElementById('profile-type').textContent = usuarioLogado.tipo === 'personal' ? 'Personal Trainer' : 'Cliente';
             document.getElementById('info-name').textContent = usuarioLogado.name;
@@ -98,8 +96,7 @@
                 const data = new Date(usuarioLogado.createdAt);
                 document.getElementById('info-data').textContent = data.toLocaleDateString('pt-BR');
             }
-
-            // Calcular estatísticas
+            
             const agendamentos = JSON.parse(localStorage.getItem('agendamentos')) || [];
             let meusTreinos = [];
             let proximoTreino = null;
@@ -109,8 +106,6 @@
             } else {
                 meusTreinos = agendamentos.filter(ag => ag.client === usuarioLogado.name);
             }
-
-            // Encontrar próximo treino
             const agora = new Date();
             const treinosFuturos = meusTreinos.filter(ag => {
                 const dataTreino = new Date(ag.date + 'T' + ag.time);
@@ -131,8 +126,6 @@
             } else {
                 document.getElementById('stats-proximo').textContent = 'Nenhum agendado';
             }
-
-            // Estilizar tipo de usuário
             const profileType = document.getElementById('profile-type');
             if (usuarioLogado.tipo === 'personal') {
                 profileType.style.color = '#e74c3c';
