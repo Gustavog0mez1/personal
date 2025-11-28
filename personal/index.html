@@ -54,7 +54,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Verificar se já está logado
+        
             const usuarioLogado = localStorage.getItem('usuarioLogado');
             if (usuarioLogado) {
                 window.location.href = 'inicio.html';
@@ -74,13 +74,11 @@
                     showMessage(loginMessage, 'Preencha todos os campos!', 'error');
                     return;
                 }
-
-                // Buscar usuário no localStorage
                 const usuarios = JSON.parse(localStorage.getItem('usuarios')) || [];
                 const usuario = usuarios.find(user => user.email === email && user.password === password);
 
                 if (usuario) {
-                    // Salvar usuário logado
+                    
                     localStorage.setItem('usuarioLogado', JSON.stringify(usuario));
                     showMessage(loginMessage, 'Login realizado! Redirecionando...', 'success');
                     setTimeout(function() {
